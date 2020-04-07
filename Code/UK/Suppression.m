@@ -17,7 +17,7 @@ M = 2;                                                                     %轻症
 C = 0;                                                                     %中重症感染人数(伦敦)serious cases
 D = 0;                                                                     %死亡人数(伦敦)death
 Q = 0;                                                                     %总感染人数(伦敦)total infected cases 
-A = 0;                                                                     %估计确诊人数(伦敦)comfirmed cases 
+W = 0;                                                                     %自愈人数(伦敦) Number of self-healing
 %---非伦敦---non-London
 N1 = 57190000;                                                             %人口总数(非伦敦)total population 
 E1 = 0;                                                                    %潜伏者(非伦敦) exposed 
@@ -28,7 +28,8 @@ Z1 = 3;                                                                    %累积
 M1 = 3;                                                                    %轻症感染人数(非伦敦)mild cases
 C1= 0;                                                                     %中重症感染人数(非伦敦)serious cases
 D1 = 0;                                                                    %死亡人数(非伦敦)death toll
-Q1 = 0;                                                                    
+Q1 = 0;                                                                    %总感染人数(非伦敦)total infected cases 
+W1 = 0;                                                                    %自愈人数(非伦敦) Number of self-healing
 %---总计---total in UK
 E2 = 0;                                                                    %潜伏者(英国总计)exposed 
 I2 = 0;                                                                    %传染者(英国总计)infected 
@@ -38,6 +39,7 @@ M2 = 0;                                                                    %轻症
 C2= 0;                                                                     %中重症感染人数(英国总计)serious cases 
 D2 = 0;                                                                    %死亡人数(英国总计) death toll
 Q2 = 0;                                                                    %总感染人数(英国总计) total infected cases 
+W2 = 0;                                                                    %自愈人数(英国总计) Number of self-healing
 
 r = 3;                                                                     %感染者接触易感者的人数 the number of persons infected who have been exposed to susceptible persons
 B = 0.05249;                                                               %传染概率 infection probability
@@ -113,6 +115,8 @@ for idx = 1:length(T)-1
     E(idx+1) = E(idx) + r*B*S(idx)*(M(idx)+C(idx))/N(1)-a*E(idx) + r3(idx)*B2*S(idx)*i*E(idx)/N-y(idx)*E(idx);
     %轻症人数 mild cases
     M(idx+1) = M(idx) + a*E(idx) - ym*M(idx) - M(idx)*(severe_critical/mild)*ac;   
+    %自愈人数 Number of self-healing
+    W(idx+1) = W(idx) + y(idx)*E(idx);
     %判断当前的可利用床位数是否满足需求 Determine whether the current number of available beds meets the requirements
     if C(idx) > hospital*h*j
         %未能住院的中重症患者人数 critical cases who were not hospitalized
@@ -153,7 +157,9 @@ for idx = 1:length(T)-1
     %潜伏者 exposed
     E1(idx+1) = E1(idx) + r*B*S1(idx)*(M1(idx)+C1(idx))/N1(1)-a*E1(idx) + r2(idx)*B2*S1(idx)*i1*E1(idx)/N1-y(idx)*E1(idx);
     %轻症人数 mild cases 
-    M1(idx+1) = M1(idx) + a*E1(idx) - ym*M1(idx) - M1(idx)*(severe_critical/mild)*ac;     
+    M1(idx+1) = M1(idx) + a*E1(idx) - ym*M1(idx) - M1(idx)*(severe_critical/mild)*ac; 
+    %自愈人数 Number of self-healing
+    W1(idx+1) = W1(idx) + y(idx)*E1(idx);
     if C1(idx) > hospital1*h*j
     	%未能住院的中重症患者 critical cases who were not hospitalized
         hospital_out1(idx) = C1(idx) - hospital1*h*j;                           
@@ -188,10 +194,12 @@ for idx = 1:length(T)-1
     %---总计（伦敦+非伦敦）--- total cases in London and non-London
     E2(idx+1) = E(idx)+E1(idx);
     I2(idx+1) = I(idx)+I1(idx);
+    C2(idx+1) = C(idx)+C1(idx);
     Z2(idx+1) = Z(idx)+Z1(idx);
     D2(idx+1) = D(idx)+D1(idx);
     Q2(idx+1) = Q(idx)+Q1(idx);
-    
+    W2(idx+1) = W(idx)+W1(idx);
+    hospital_out2(idx+1) = hospital_out(idx)+hospital_out1(idx);
     %计算每日再生数 Calculate the number of regeneration per day
     Rt0(idx) = 1 + (log(Q(idx))/idx)*(2+4) + (log(Q(idx))/idx)^2 * (2*4);  %伦敦 London
     Rt1(idx) = 1 + (log(Q1(idx))/idx)*(2+4) + (log(Q1(idx))/idx)^2 * (2*4);%非伦敦 non-London
@@ -199,13 +207,13 @@ for idx = 1:length(T)-1
 end
 
 T1 = 1:350;
-plot(T1(9:349),Rt2(9:349));grid on;hold on;
+%plot(T1(9:349),Rt2(9:349));grid on;hold on;
 %legend('UK Basic reproduction number')
 %xlabel('Number of Days from 6th Feburary');ylabel('Number')
 
-%plot(T,E,T,I,T,D,T,E1,T,I1,T,D1);grid on;
-%legend('Daily expoesd population(London)','Daily infectious population(London)','Total deaths(London)','Daily expoesd population(UK non-London)','Daily infectious population(UK non-London)','Total deaths(UK non-London)')
-plot(T,E2,T,I2,T,D2);grid on;
+plot(T,E,T,I,T,D,T,E1,T,I1,T,D1);grid on;
+legend('Daily expoesd population(London)','Daily infectious population(London)','Total deaths(London)','Daily expoesd population(UK non-London)','Daily infectious population(UK non-London)','Total deaths(UK non-London)')
+%plot(T,E,T,I);grid on;
 legend('Daily expoesd population(UK)','Daily infectious population(UK)','Total deaths(UK)')
 hold on;
 xlabel('Number of Days from 6th Feburary');ylabel('Number of People')
