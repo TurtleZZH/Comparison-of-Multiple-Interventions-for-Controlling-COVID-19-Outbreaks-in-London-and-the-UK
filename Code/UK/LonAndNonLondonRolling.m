@@ -2,7 +2,7 @@
 %   初始化
 %--------------------------------------------------------------------------
 clear;clc;
-%-------------------伦敦地区和非伦敦地区强干预----------------
+%-------------------伦敦地区，非伦敦地区同时3周进行3-5的缩放 London area, non-london area at the same time 3-5 scale----------------
 %--------------------------------------------------------------------------
 %   参数设置
 %--------------------------------------------------------------------------
@@ -78,11 +78,13 @@ i = 0.785;                                                                 %隔离
 i1 =0.911;                                                                  %隔离率（非伦敦）Isolation rate non-London
 %True daily death toll
 death1=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,3,7,7,9,10,28,43,65,81,115,158,194,250,285,359,208,694,877,1162,1455,1669,2043,2425,3095,3747,4461,5221,5865,6433,7471,8505,9608,10760,11599,12285,13029,14073,14915,15944,16879,17994,18492,19051,20223,21060,21787,22792,23635,24055,24393,25302,26097,26771];
+u=5;  %放缩上界 Zoom in the upper bound
+d=3;  %放缩下界 Zoom in the lower bound
 T = 1:350;
 for idx = 1:length(T)-1
     r2(idx+1) = r2(idx);
     r3(idx+1) = r3(idx);    
-    if idx == 57                                                           %Day 57 Nightingale Hospital Completed with Increased Medical Resources
+    if idx == 57 %Day 57 Nightingale Hospital Completed with Increased Medical Resources
         h_london = h_london+4000;
         h_nonlondon = h_nonlondon+29000;
         ha_london = ha_london+4000;
@@ -90,8 +92,36 @@ for idx = 1:length(T)-1
         hospital = hospital + 4000;
         hospital1 = hospital1 + 29000;
     end
-     if idx >= 46                                                           %以二月七日为起准，46日后即三月二十三日进行限制流通措施 from February 7, restrictions was imposed for 46 days
-        if r2(idx) ~= 6                                                    %强干预下，流通限制强从10到3，采取限制后每天减少1个人 Under the strong intervention, the circulation restriction was  from 10 to 3, and the restriction was reduced by 1 person per day
+    if idx >= 340
+        r2(idx+1) = d;r3(idx+1) = d;
+	elseif idx >= 319
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 298
+        r2(idx+1) = d;r3(idx+1) = d;
+	elseif idx >= 277
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 256
+       r2(idx+1) = d;r3(idx+1) = d;
+	elseif idx >= 235
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 214
+        r2(idx+1) = d;r3(idx+1) = d;
+	elseif idx >= 193
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 172
+       r2(idx+1) = d;r3(idx+1) = d;
+    elseif idx >= 151
+       r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 130
+        r2(idx+1) = d;r3(idx+1) = d;
+    elseif idx >= 109
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 88
+        r2(idx+1) = d;r3(idx+1) = d;
+    elseif idx >= 67
+        r2(idx+1) = u;r3(idx+1) = u;
+    elseif idx >= 46                                                           %以二月七日为起准，46日后即三月二十三日进行限制流通措施 from February 7, restrictions was imposed for 46 days
+        if r2(idx) ~= 3                                                    %强干预下，流通限制强从10到3，采取限制后每天减少1个人 Under the strong intervention, the circulation restriction was  from 10 to 3, and the restriction was reduced by 1 person per day
             r2(idx+1) = r2(idx)-1;
             r3(idx+1) = r3(idx)-1;
         end
@@ -118,7 +148,7 @@ for idx = 1:length(T)-1
         end 
     elseif idx>=1 
         if hospital <= ha_london
-             hospital = hospital + 30;                                    %随时间不断增加总床位数
+             hospital = hospital + 30;                                    %随时间不断增加总床位数 Increase the total number of beds over time
          end
           if hospital1 <= ha_nonlondon
              hospital1 = hospital1 + 90;
@@ -237,34 +267,11 @@ for idx = 1:length(T)-1
     hospital_out2(idx+1) = hospital_out(idx)+hospital_out1(idx);
     
 end
-    csvwrite('death.csv',D)
-    csvwrite('death1.csv',D1)
-    csvwrite('death2.csv',D2)
-     csvwrite('E.csv',E2)
-    csvwrite('I.csv',I2)
-hold on;
-% T1 = 1:350;
-% plot(T1(9:349),Rt2(9:349));grid on;hold on;
-% legend('UK Basic reproduction number')
-% xlabel('Number of Days from 6th Feburary');ylabel('Number')
-% plot(T,C2,T,H2,T,hospital_out2);grid on;
-% legend('病床需求量','病床供给量','医院外人数')
-%plot(T,E,T,I,T,D,T,E1,T,I1,T,D1,T,E2,T,I2,T,D2);grid on;
+%plot(T,E,T,I,T,D,T,E1,T,I1,T,D1);grid on;
+%legend('Daily expoesd population(London)','Daily infectious population(London)','Total deaths(London)','Daily expoesd population(UK non-London)','Daily infectious population(UK non-London)','Total deaths(UK non-London)')
 plot(T,E2,T,I2,T,D2);grid on;
-%plot(T,DD2);grid on;
-legend('Daily expoesd population(London)','Daily infectious population(London)','Total deaths(London)','Daily expoesd population(UK non-London)','Daily infectious population(UK non-London)','Total deaths(UK non-London)','Daily expoesd population(UK)','Daily infectious population(UK)','Total deaths(UK)','Daily expoesd population(UK)','Daily infectious population(UK)','Total deaths(UK)')
-%plot(death1);hold on;
-%plot(T(1:84),D2(1:84),"*");
-%plot(T,D2);
-%legend('Real Total Deaths(UK)','Predicted Total Deaths(UK)(60% available bed ratio)','Predicted Total Deaths(UK)(50% available bed ratio)','Predicted Total Deaths(UK)(40% available bed ratio)')
-% plot(T,E2,T,I2);grid on;
-%legend('UK Daily expoesd population low','UK Daily infectious population  low','UK Daily expoesd population moderate','UK Daily infectious population  moderate','UK Daily expoesd population high','UK Daily infectious population  high')
-% plot(T,D,T,D1,T,D2);grid on;
-% legend('Total deaths(London) low','Total deaths(UK non-London) low','Total deaths(UK) low','Total deaths(London) moderate','Total deaths(UK non-London) moderate','Total deaths(UK) moderate','Total deaths(London) high','Total deaths(UK non-London) high','Total deaths(UK) high')
-
+legend('Daily expoesd population(UK)','Daily infectious population(UK)','Total deaths(UK)')
 hold on;
 xlabel('Number of Days from 6th Feburary');ylabel('Number of People')
 
-
-
-title('UK -- Suppression Intervetion on 23rd March')
+title('UK -- Multiplee Intervetion on 23rd March')
